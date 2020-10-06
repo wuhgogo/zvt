@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from sqlalchemy import Column, String, DateTime, Float
+from sqlalchemy import Column, String, DateTime, Float, DECIMAL
 from sqlalchemy.ext.declarative import declarative_base
 
 from zvt.contract import Mixin
@@ -15,14 +15,14 @@ class DividendFinancing(DividendFinancingBase, Mixin):
     code = Column(String(length=32))
 
     # 分红总额
-    dividend_money = Column(Float)
+    dividend_money = Column(DECIMAL(16, 3))
 
     # 新股
     ipo_issues = Column(Float)
     ipo_raising_fund = Column(Float)
 
     # 增发
-    spo_issues = Column(Float)
+    spo_issues = Column(DECIMAL(16))
     spo_raising_fund = Column(Float)
     # 配股
     rights_issues = Column(Float)

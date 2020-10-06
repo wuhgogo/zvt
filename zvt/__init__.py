@@ -5,6 +5,10 @@ import os
 from logging.handlers import RotatingFileHandler
 
 import pandas as pd
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy_utils import database_exists
 
 from zvt.settings import DATA_SAMPLE_ZIP_PATH, ZVT_TEST_HOME, ZVT_HOME, ZVT_TEST_DATA_PATH, ZVT_TEST_ZIP_DATA_PATH
 from zvt.utils.zip_utils import unzip
@@ -105,6 +109,44 @@ if os.getenv('TESTING_ZVT'):
 
         copyfile(DATA_SAMPLE_ZIP_PATH, ZVT_TEST_ZIP_DATA_PATH)
         unzip(ZVT_TEST_ZIP_DATA_PATH, ZVT_TEST_DATA_PATH)
+
+    if "db_engine" in zvt_env:
+        # foreach test data file
+        test_data_dir = os.listdir(ZVT_TEST_DATA_PATH)
+        for cur_file in test_data_dir:
+            path = os.path.join(ZVT_TEST_DATA_PATH, cur_file)
+            engine_key = os.path.splitext(cur_file)[0]
+            file_suffix = os.path.splitext(cur_file)[1]
+            if os.path.isfile(path) and file_suffix == ".db":
+                # create db engine
+                sqlite_path = os.path.join(ZVT_TEST_DATA_PATH, '{}.db?check_same_thread=False'.format(engine_key))
+                sqlite_engine = create_engine('sqlite:///' + sqlite_path, echo=False)
+                db_url = f"{zvt_env['db_engine']}+mysqldb://{zvt_env['db_username']}:{zvt_env['db_password']}@{zvt_env['db_address']}:" f"{zvt_env['db_port']}/{engine_key}?charset=utf8mb4"
+                # cause we use read_sql and to_sql to copy the data and no way to call this after register_schema
+                # so the copy will after once running that create the database and table
+                if database_exists(db_url):
+                    mysql_engine = create_engine(db_url, pool_recycle=3600, echo=False)
+                    # copy db data
+                    session = sessionmaker(bind=mysql_engine)
+                    session = session()
+                    Base = declarative_base()
+                    Base.metadata.reflect(sqlite_engine)
+                    tables = Base.metadata.tables
+                    for table in tables:
+                        # copy data to not exists table will create incompatible schema
+                        # so copy action will after the schema create
+                        if mysql_engine.dialect.has_table(mysql_engine, table):
+                            sqlite_data = pd.read_sql(table, sqlite_engine)
+                            mysql_data = pd.read_sql(table, mysql_engine)
+                            if sqlite_data.shape[0] > 0 and mysql_data.shape[0] == 0:
+                                try:
+                                    print("copy {}.{} size {}".format(engine_key, table, sqlite_data.shape[0]))
+                                    sqlite_data.to_sql(table, mysql_engine, index=False, if_exists='append')
+                                    session.commit()
+                                except Exception as e:
+                                    print(e)
+                                    session.rollback()
+
 
 else:
     init_env(zvt_home=ZVT_HOME)

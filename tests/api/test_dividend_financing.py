@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from ..context import init_test_context
 
 init_test_context()
@@ -44,7 +46,7 @@ def test_000778_dividend_financing():
     assert len(result) == 22
     latest: DividendFinancing = result[1]
     assert latest.timestamp == to_pd_timestamp('2017')
-    assert latest.dividend_money == 598632026.4
-    assert latest.spo_issues == 347572815.0
+    assert latest.dividend_money == Decimal('598632026.400')
+    assert latest.spo_issues == Decimal('347572815')
     assert latest.rights_issues == 0
     assert latest.ipo_issues == 0
