@@ -134,7 +134,7 @@ class JqChinaStockEtfPortfolioRecorder(TimeSeriesDataRecorder):
         return None
 
 
-__all__ = ['JqChinaStockRecorder', 'JqChinaEtfRecorder', 'JqChinaStockEtfPortfolioRecorder']
+__all__ = ['JqChinaStockRecorder', 'JqChinaEtfRecorder', 'JqChinaStockEtfPortfolioRecorder', 'JqChinaIndexRecorder']
 
 if __name__ == '__main__':
     # JqChinaEtfRecorder().run()
