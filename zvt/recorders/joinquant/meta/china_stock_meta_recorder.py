@@ -8,6 +8,7 @@ from zvt.utils.pd_utils import pd_is_not_null
 from zvt import zvt_env
 from zvt.api.quote import china_stock_code_to_id, portfolio_relate_stock
 from zvt.domain import EtfStock, Stock, Etf, StockDetail
+from zvt.domain import EtfStock, Stock, Etf, StockDetail, Index
 from zvt.recorders.joinquant.common import to_entity_id, jq_to_report_period
 
 
@@ -70,6 +71,18 @@ class JqChinaEtfRecorder(BaseJqChinaMetaRecorder):
         logout()
 
 
+class JqChinaIndexRecorder(BaseJqChinaMetaRecorder):
+    data_schema = Index
+
+    def run(self):
+        # 抓取index列表
+        df_index = self.to_zvt_entity(get_all_securities(code='index'), entity_type='index', category='index')
+        df_to_db(df_index, data_schema=Index, provider=self.provider, force_update=self.force_update)
+
+        # self.logger.info(df_index)
+        self.logger.info("persist index list success")
+
+
 class JqChinaStockEtfPortfolioRecorder(TimeSeriesDataRecorder):
     entity_provider = 'joinquant'
     entity_schema = Etf
@@ -121,8 +134,9 @@ class JqChinaStockEtfPortfolioRecorder(TimeSeriesDataRecorder):
         return None
 
 
-__all__ = ['JqChinaStockRecorder', 'JqChinaEtfRecorder', 'JqChinaStockEtfPortfolioRecorder']
+__all__ = ['JqChinaStockRecorder', 'JqChinaEtfRecorder', 'JqChinaStockEtfPortfolioRecorder', 'JqChinaIndexRecorder']
 
 if __name__ == '__main__':
-    # JqChinaStockRecorder().run()
-    JqChinaStockEtfPortfolioRecorder(codes=['510050']).run()
+    # JqChinaEtfRecorder().run()
+    # JqChinaStockEtfPortfolioRecorder(codes=['510050']).run()
+    JqChinaIndexRecorder().run()

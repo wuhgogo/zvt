@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from sqlalchemy import String, Column, Float
+from sqlalchemy import String, Column, Float, DECIMAL
 
 from zvt.contract import Mixin
 
@@ -45,8 +45,27 @@ class BlockKdataCommon(KdataCommon):
     pass
 
 
-class IndexKdataCommon(KdataCommon):
-    pass
+class IndexKdataCommon(Mixin):
+    provider = Column(String(length=32))
+    code = Column(String(length=32))
+    name = Column(String(length=32))
+    # Enum constraint is not extendable
+    # level = Column(Enum(IntervalLevel, values_callable=enum_value))
+    level = Column(String(length=32))
+
+    # 如果是股票，代表前复权数据
+    # 开盘价
+    open = Column(DECIMAL(16, 3))
+    # 收盘价
+    close = Column(DECIMAL(16, 3))
+    # 最高价
+    high = Column(DECIMAL(16, 3))
+    # 最低价
+    low = Column(DECIMAL(16, 3))
+    # 成交量
+    volume = Column(DECIMAL(16, 3))
+    # 成交金额
+    turnover = Column(DECIMAL(20, 3))
 
 
 class EtfKdataCommon(KdataCommon):
