@@ -11,6 +11,7 @@ from zvt.informer.informer import EmailInformer
 logger = logging.getLogger(__name__)
 
 sched = BackgroundScheduler()
+sleeping_time = 1
 
 
 @sched.scheduled_job('cron', hour=6, minute=0)
@@ -19,8 +20,8 @@ def record_stock():
         email_action = EmailInformer()
 
         try:
-            Stock.record_data(provider='joinquant', sleeping_time=1)
-            StockTradeDay.record_data(provider='joinquant', sleeping_time=1)
+            Stock.record_data(provider='joinquant', sleeping_time=sleeping_time)
+            StockTradeDay.record_data(provider='joinquant', sleeping_time=sleeping_time)
             email_action.send_message("5533061@qq.com", 'joinquant record stock finished', '')
             break
         except Exception as e:
@@ -38,8 +39,8 @@ def record_kdata():
 
         try:
             # 日线前复权和后复权数据
-            Stock1dKdata.record_data(provider='joinquant', sleeping_time=1)
-            Stock1dHfqKdata.record_data(provider='joinquant', sleeping_time=1)
+            Stock1dKdata.record_data(provider='joinquant', sleeping_time=sleeping_time)
+            Stock1dHfqKdata.record_data(provider='joinquant', sleeping_time=sleeping_time)
             email_action.send_message("5533061@qq.com", 'joinquant record kdata finished', '')
             break
         except Exception as e:

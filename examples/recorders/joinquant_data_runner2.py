@@ -11,6 +11,7 @@ from zvt.informer.informer import EmailInformer
 logger = logging.getLogger(__name__)
 
 sched = BackgroundScheduler()
+sleeping_time = 1
 
 
 # 每天下午17:00抓取
@@ -19,7 +20,7 @@ def record_margin_trading():
     email_action = EmailInformer()
 
     try:
-        MarginTrading.record_data(provider='joinquant', sleeping_time=1)
+        MarginTrading.record_data(provider='joinquant', sleeping_time=sleeping_time)
         email_action.send_message("5533061@qq.com", 'joinquant record margin trading finished', '')
     except Exception as e:
         msg = f'joinquant record margin trading:{e}'
@@ -37,10 +38,10 @@ def record_kdata():
 
         try:
             # 周线前复权和后复权数据
-            Stock1wkKdata.record_data(provider='joinquant', sleeping_time=1)
-            Stock1wkHfqKdata.record_data(provider='joinquant', sleeping_time=1)
+            Stock1wkKdata.record_data(provider='joinquant', sleeping_time=sleeping_time)
+            Stock1wkHfqKdata.record_data(provider='joinquant', sleeping_time=sleeping_time)
             # 个股估值数据
-            StockValuation.record_data(provider='joinquant', sleeping_time=1)
+            StockValuation.record_data(provider='joinquant', sleeping_time=sleeping_time)
 
             email_action.send_message("5533061@qq.com", 'joinquant record week kdata finished', '')
             break
@@ -59,8 +60,8 @@ def record_others():
         email_action = EmailInformer()
 
         try:
-            Etf.record_data(provider='joinquant', sleeping_time=1)
-            EtfStock.record_data(provider='joinquant', sleeping_time=1)
+            Etf.record_data(provider='joinquant', sleeping_time=sleeping_time)
+            EtfStock.record_data(provider='joinquant', sleeping_time=sleeping_time)
 
             email_action.send_message("5533061@qq.com", 'joinquant record etf finished', '')
             break
