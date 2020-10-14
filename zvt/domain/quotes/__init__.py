@@ -65,7 +65,7 @@ class IndexKdataCommon(Mixin):
     # 成交量
     volume = Column(DECIMAL(16, 3))
     # 成交金额
-    turnover = Column(DECIMAL(16, 3))
+    turnover = Column(DECIMAL(20, 3))
 
 
 class EtfKdataCommon(KdataCommon):

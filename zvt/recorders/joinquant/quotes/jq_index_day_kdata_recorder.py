@@ -46,12 +46,12 @@ class JqChinaIndexDayKdataRecorder(FixedCycleDataRecorder):
     def record(self, entity, start, end, size, timestamps):
         if not self.end_timestamp:
             df = get_bars(to_jq_entity_id(entity),
-                          count=10,
+                          count=size,
                           unit=self.jq_trading_level)
         else:
             end_timestamp = to_time_str(self.end_timestamp)
             df = get_bars(to_jq_entity_id(entity),
-                          count=10,
+                          count=size,
                           unit=self.jq_trading_level,
                           # fields=['date', 'open', 'close', 'low', 'high', 'volume', 'money'],
                           end_date=end_timestamp)
