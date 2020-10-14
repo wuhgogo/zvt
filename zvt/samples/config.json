@@ -8,10 +8,5 @@
   "email_username": "",
   "email_password": "",
   "wechat_app_id": "",
-  "wechat_app_secrect": "",
-  "db_engine": "",
-  "db_address": "",
-  "db_port": "",
-  "db_username": "",
-  "db_password": ""
+  "wechat_app_secrect": ""
 }
