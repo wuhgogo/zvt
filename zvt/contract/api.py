@@ -10,6 +10,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.ext.declarative import DeclarativeMeta
 from sqlalchemy.orm import Query
 from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy_utils import database_exists, create_database
 
 from zvt import zvt_env
 from zvt.contract import IntervalLevel, EntityMixin
@@ -57,9 +58,22 @@ def get_db_engine(provider: str,
 
     engine_key = '{}_{}'.format(provider, db_name)
     db_engine = zvt_context.db_engine_map.get(engine_key)
+
+    if "True" == zvt_env.get("db_echo"):
+        need_echo = True
+    else:
+        need_echo = False
+
     if not db_engine:
-        db_engine = create_engine('sqlite:///' + db_path, echo=False)
-        zvt_context.db_engine_map[engine_key] = db_engine
+        if "db_engine" in zvt_env:
+            db_url = f"{zvt_env['db_engine']}+mysqldb://{zvt_env['db_username']}:{zvt_env['db_password']}@{zvt_env['db_address']}:" f"{zvt_env['db_port']}/{engine_key}?charset=utf8mb4"
+            if not database_exists(db_url):
+                create_database(db_url)
+            db_engine = create_engine(db_url, pool_recycle=3600, echo=need_echo)
+
+        else:
+            db_engine = create_engine('sqlite:///' + db_path, echo=need_echo)
+            zvt_context.db_engine_map[engine_key] = db_engine
     return db_engine
 
 

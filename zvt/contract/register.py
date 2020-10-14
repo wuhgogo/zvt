@@ -3,11 +3,13 @@ import logging
 from typing import List
 
 import sqlalchemy
+from sqlalchemy.engine.reflection import Inspector
 from sqlalchemy.ext.declarative import DeclarativeMeta
 
 from zvt.contract import EntityMixin, zvt_context, Mixin
 from zvt.contract.api import get_db_engine, get_db_session_factory
 from zvt.utils.utils import add_to_map_list
+from zvt import zvt_env
 
 logger = logging.getLogger(__name__)
 
@@ -74,6 +76,11 @@ def register_schema(providers: List[str],
 
     zvt_context.dbname_map_schemas[db_name] = schemas
 
+    if "False" == zvt_env.get("db_scan"):
+        need_scan = False
+    else:
+        need_scan = True
+
     for provider in providers:
         # track in in  _providers
         if provider not in zvt_context.providers:
@@ -86,37 +93,36 @@ def register_schema(providers: List[str],
 
         # create the db & table
         engine = get_db_engine(provider, db_name=db_name)
-        schema_base.metadata.create_all(engine)
+        if need_scan:
+            schema_base.metadata.create_all(engine)
 
         session_fac = get_db_session_factory(provider, db_name=db_name)
         session_fac.configure(bind=engine)
 
-    for provider in providers:
-        engine = get_db_engine(provider, db_name=db_name)
+    if need_scan:
+        for provider in providers:
+            engine = get_db_engine(provider, db_name=db_name)
+            inspector = Inspector.from_engine(engine)
 
-        # create index for 'timestamp','entity_id','code','report_period','updated_timestamp
-        for table_name, table in iter(schema_base.metadata.tables.items()):
-            index_list = []
-            with engine.connect() as con:
-                rs = con.execute("PRAGMA INDEX_LIST('{}')".format(table_name))
-                for row in rs:
-                    index_list.append(row[1])
+            # create index for 'timestamp','entity_id','code','report_period','updated_timestamp
+            for table_name, table in iter(schema_base.metadata.tables.items()):
+                index_list = [index['name'] for index in inspector.get_indexes(table_name)]
 
-            logger.debug('engine:{},table:{},index:{}'.format(engine, table_name, index_list))
+                logger.debug('engine:{},table:{},index:{}'.format(engine, table_name, index_list))
 
-            for col in ['timestamp', 'entity_id', 'code', 'report_period', 'created_timestamp', 'updated_timestamp']:
-                if col in table.c:
-                    column = eval('table.c.{}'.format(col))
-                    index_name = '{}_{}_index'.format(table_name, col)
-                    if index_name not in index_list:
-                        index = sqlalchemy.schema.Index(index_name, column)
-                        index.create(engine)
-            for cols in [('timestamp', 'entity_id'), ('timestamp', 'code')]:
-                if (cols[0] in table.c) and (col[1] in table.c):
-                    column0 = eval('table.c.{}'.format(col[0]))
-                    column1 = eval('table.c.{}'.format(col[1]))
-                    index_name = '{}_{}_{}_index'.format(table_name, col[0], col[1])
-                    if index_name not in index_list:
-                        index = sqlalchemy.schema.Index(index_name, column0,
-                                                        column1)
-                        index.create(engine)
+                for col in ['timestamp', 'entity_id', 'code', 'report_period', 'created_timestamp', 'updated_timestamp']:
+                    if col in table.c:
+                        column = eval('table.c.{}'.format(col))
+                        index_name = '{}_{}_index'.format(table_name, col)
+                        if index_name not in index_list:
+                            index = sqlalchemy.schema.Index(index_name, column)
+                            index.create(engine)
+                for cols in [('timestamp', 'entity_id'), ('timestamp', 'code')]:
+                    if (cols[0] in table.c) and (col[1] in table.c):
+                        column0 = eval('table.c.{}'.format(col[0]))
+                        column1 = eval('table.c.{}'.format(col[1]))
+                        index_name = '{}_{}_{}_index'.format(table_name, col[0], col[1])
+                        if index_name not in index_list:
+                            index = sqlalchemy.schema.Index(index_name, column0,
+                                                            column1)
+                            index.create(engine)

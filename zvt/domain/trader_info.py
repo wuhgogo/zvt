@@ -55,7 +55,7 @@ class Position(TraderBase, Mixin):
     # 机器人名字
     trader_name = Column(String(length=128))
     # 账户id
-    account_stats_id = Column(Integer, ForeignKey('account_stats.id'))
+    account_stats_id = Column(String(length=128), ForeignKey('account_stats.id'))
     account_stats = relationship("AccountStats", back_populates="positions")
 
     # 做多数量

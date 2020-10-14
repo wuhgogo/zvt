@@ -132,8 +132,8 @@ class SimAccountService(AccountService):
         if trader_info:
             self.logger.warning("trader:{} has run before,old result would be deleted".format(self.trader_name))
             self.session.query(TraderInfo).filter(TraderInfo.trader_name == self.trader_name).delete()
-            self.session.query(AccountStats).filter(AccountStats.trader_name == self.trader_name).delete()
             self.session.query(Position).filter(Position.trader_name == self.trader_name).delete()
+            self.session.query(AccountStats).filter(AccountStats.trader_name == self.trader_name).delete()
             self.session.query(Order).filter(Order.trader_name == self.trader_name).delete()
             self.session.commit()
 
