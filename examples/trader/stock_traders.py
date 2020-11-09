@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from trader.analysis import RiskAnalysisTradingListener
 from zvt.contract import IntervalLevel
 from zvt.factors.ma.ma_factor import CrossMaFactor
 from zvt.factors.target_selector import TargetSelector
@@ -36,8 +37,11 @@ class MyBullTrader(StockTrader):
 
 if __name__ == '__main__':
     # single stock with cross ma factor
-    MyMaTrader(codes=['000338'], level=IntervalLevel.LEVEL_1DAY, start_timestamp='2018-01-01',
-               end_timestamp='2019-06-30', trader_name='000338_ma_trader').run()
+    trader_name = '000338_ma_trader'
+    trader = MyMaTrader(codes=['000338'], level=IntervalLevel.LEVEL_1DAY, start_timestamp='2015-01-01',
+                        end_timestamp='2020-10-01', trader_name=trader_name)
+    trader.register_trading_signal_listener(RiskAnalysisTradingListener(trader_name=trader_name, draw_result=True))
+    trader.run()
 
     # single stock with bull factor
     # MyBullTrader(codes=['000338'], level=IntervalLevel.LEVEL_1DAY, start_timestamp='2018-01-01',

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import datetime
 import logging
 import time
 
@@ -69,6 +70,24 @@ def record_others():
             logger.exception(msg)
 
             email_action.send_message("5533061@qq.com", 'joinquant record etf error', msg)
+            time.sleep(60)
+    while True:
+        email_action = EmailInformer()
+
+        try:
+            Index.record_data(provider='joinquant', sleeping_time=sleeping_time)
+
+            now = datetime.datetime.now()
+            end_time = now if now.hour >= 19 else now + datetime.timedelta(hours=-19)
+            Index1dKdata.record_data(provider='joinquant', sleeping_time=0.1, end_timestamp=end_time)
+
+            email_action.send_message("5533061@qq.com", 'joinquant record index finished', '')
+            break
+        except Exception as e:
+            msg = f'joinquant record index error:{e}'
+            logger.exception(msg)
+
+            email_action.send_message("5533061@qq.com", 'joinquant record index error', msg)
             time.sleep(60)
 
 
