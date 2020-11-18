@@ -270,7 +270,7 @@ class DataReader(Drawable):
     def empty(self):
         return not pd_is_not_null(self.data_df)
 
-    def get_main_df(self) -> Optional[pd.DataFrame]:
+    def drawer_main_df(self) -> Optional[pd.DataFrame]:
         return self.data_df
 
 

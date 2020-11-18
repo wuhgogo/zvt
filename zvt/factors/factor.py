@@ -103,6 +103,22 @@ class FactorType(enum.Enum):
     state = 'state'
 
 
+# factor class registry
+factor_cls_registry = {}
+
+
+def register_class(target_class):
+    if target_class.__name__ not in ('Factor', 'FilterFactor', 'ScoreFactor', 'StateFactor', 'TechnicalFactor'):
+        factor_cls_registry[target_class.__name__] = target_class
+
+
+class FactorMeta(type):
+    def __new__(meta, name, bases, class_dict):
+        cls = type.__new__(meta, name, bases, class_dict)
+        register_class(cls)
+        return cls
+
+
 class Factor(DataReader, DataListener):
     factor_type: FactorType = None
 
@@ -254,13 +270,13 @@ class Factor(DataReader, DataListener):
         drawer = Drawer(self.factor_df)
         return drawer
 
-    def get_main_data(self) -> Optional[NormalData]:
+    def drawer_main_df(self) -> Optional[NormalData]:
         return self.data_df
 
-    def get_factor_df_list(self) -> Optional[List[pd.DataFrame]]:
+    def drawer_factor_df_list(self) -> Optional[List[pd.DataFrame]]:
         return [self.factor_df]
 
-    def get_sub_df(self) -> Optional[pd.DataFrame]:
+    def drawer_sub_df(self) -> Optional[pd.DataFrame]:
         return self.result_df
 
     def fill_gap(self):
@@ -345,4 +361,5 @@ class StateFactor(Factor):
 
 
 # the __all__ is generated
-__all__ = ['Indicator', 'Transformer', 'Accumulator', 'Scorer', 'FactorType', 'Factor', 'FilterFactor', 'ScoreFactor', 'StateFactor']
+__all__ = ['Indicator', 'Transformer', 'Accumulator', 'Scorer', 'FactorType', 'Factor', 'FilterFactor', 'ScoreFactor',
+           'StateFactor']

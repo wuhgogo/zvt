@@ -7,10 +7,10 @@ from zvt.api.quote import get_kdata_schema
 from zvt.contract import IntervalLevel, EntityMixin, AdjustType
 from zvt.domain import Stock
 from zvt.factors.algorithm import MacdTransformer, consecutive_count
-from zvt.factors.factor import Factor, Transformer, Accumulator
+from zvt.factors.factor import Factor, Transformer, Accumulator, FactorMeta
 
 
-class TechnicalFactor(Factor):
+class TechnicalFactor(Factor, metaclass=FactorMeta):
     def __init__(self,
                  entity_schema: EntityMixin = Stock,
                  provider: str = None,

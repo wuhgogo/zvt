@@ -13,36 +13,54 @@ from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import now_time_str, TIME_FORMAT_ISO8601
 
 
+class Rect(object):
+
+    def __init__(self, x0, y0, x1, y1) -> None:
+        # left-top
+        self.x0 = x0
+        self.x1 = x1
+        # right-bottom
+        self.y0 = y0
+        self.y1 = y1
+
+
 class Drawable(object):
 
     def draw(self, width=None, height=None, title=None, keep_ui_state=True, show=False, **kwargs):
-        drawer = Drawer(main_df=self.get_main_df(), main_data=self.get_main_data(),
-                        factor_df_list=self.get_factor_df_list(), factor_data_list=self.get_factor_data_list(),
-                        sub_df=self.get_sub_df(), sub_data=self.get_sub_data(),
-                        annotation_df=self.get_annotation_df())
+        drawer = Drawer(main_df=self.drawer_main_df(),
+                        main_data=self.drawer_main_data(),
+                        factor_df_list=self.drawer_factor_df_list(),
+                        factor_data_list=self.drawer_factor_data_list(),
+                        sub_df=self.drawer_sub_df(),
+                        sub_data=self.drawer_sub_data(),
+                        annotation_df=self.drawer_annotation_df(),
+                        rects=self.drawer_rects())
 
-        drawer.draw_kline(width=width, height=height, title=title, keep_ui_state=keep_ui_state, show=show,
-                          **kwargs)
+        return drawer.draw_kline(width=width, height=height, title=title, keep_ui_state=keep_ui_state, show=show,
+                                 **kwargs)
 
-    def get_main_df(self) -> Optional[pd.DataFrame]:
+    def drawer_main_df(self) -> Optional[pd.DataFrame]:
         return None
 
-    def get_main_data(self) -> Optional[NormalData]:
+    def drawer_main_data(self) -> Optional[NormalData]:
         return None
 
-    def get_factor_df_list(self) -> Optional[List[pd.DataFrame]]:
+    def drawer_factor_df_list(self) -> Optional[List[pd.DataFrame]]:
         return None
 
-    def get_factor_data_list(self) -> Optional[List[NormalData]]:
+    def drawer_factor_data_list(self) -> Optional[List[NormalData]]:
         return None
 
-    def get_sub_df(self) -> Optional[pd.DataFrame]:
+    def drawer_sub_df(self) -> Optional[pd.DataFrame]:
         return None
 
-    def get_sub_data(self) -> Optional[NormalData]:
+    def drawer_sub_data(self) -> Optional[NormalData]:
         return None
 
-    def get_annotation_df(self) -> Optional[pd.DataFrame]:
+    def drawer_annotation_df(self) -> Optional[pd.DataFrame]:
+        return None
+
+    def drawer_rects(self) -> List[Rect]:
         return None
 
 
@@ -54,7 +72,7 @@ class Drawer(object):
                  main_data: NormalData = None,
                  factor_data_list: List[NormalData] = None,
                  sub_data: NormalData = None,
-                 rects=None,
+                 rects: List[Rect] = None,
                  annotation_df: pd.DataFrame = None) -> None:
         """
 
@@ -86,6 +104,9 @@ class Drawer(object):
 
         # 主图的标记数据
         self.annotation_df = annotation_df
+
+        # [((x,y),(x1,y1))]
+        self.rects = rects
 
     def _draw(self,
               main_chart='kline',
@@ -170,6 +191,17 @@ class Drawer(object):
 
         fig.layout = self.gen_plotly_layout(width=width, height=height, title=title, keep_ui_state=keep_ui_state,
                                             subplot=subplot)
+
+        # 绘制矩形
+        if self.rects:
+            for rect in self.rects:
+                fig.add_shape(type="rect",
+                              x0=rect.x0, y0=rect.y0, x1=rect.x1, y1=rect.y1,
+                              line=dict(
+                                  color="RoyalBlue",
+                                  width=2),
+                              fillcolor="LightSkyBlue")
+            fig.update_shapes(dict(xref='x', yref='y'))
 
         if show:
             fig.show()
