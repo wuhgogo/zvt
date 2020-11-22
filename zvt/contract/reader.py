@@ -8,7 +8,7 @@ import pandas as pd
 
 from zvt.contract import IntervalLevel, Mixin, EntityMixin
 from zvt.contract.api import get_entities
-from zvt.drawer.drawer import Drawable
+from zvt.contract.drawer import Drawable
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import to_pd_timestamp, now_pd_timestamp
 

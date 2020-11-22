@@ -44,6 +44,12 @@ load_traders()
 def trader_layout():
     layout = html.Div(
         [
+            dcc.Interval(
+                id='interval-component',
+                interval=60 * 60 * 1000,  # in milliseconds
+                n_intervals=0
+            ),
+
             # controls
             html.Div(
                 className="three columns card",

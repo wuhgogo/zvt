@@ -8,10 +8,10 @@ import pandas as pd
 
 from zvt.contract import IntervalLevel, Mixin, EntityMixin
 from zvt.contract.api import get_data, df_to_db
+from zvt.contract.drawer import Drawer
 from zvt.contract.normal_data import NormalData
 from zvt.contract.reader import DataReader, DataListener
-from zvt.domain import Stock
-from zvt.drawer.drawer import Drawer
+from zvt.contract.zvt_context import factor_cls_registry
 from zvt.utils.pd_utils import pd_is_not_null
 
 
@@ -103,10 +103,6 @@ class FactorType(enum.Enum):
     state = 'state'
 
 
-# factor class registry
-factor_cls_registry = {}
-
-
 def register_class(target_class):
     if target_class.__name__ not in ('Factor', 'FilterFactor', 'ScoreFactor', 'StateFactor', 'TechnicalFactor'):
         factor_cls_registry[target_class.__name__] = target_class
@@ -127,7 +123,7 @@ class Factor(DataReader, DataListener):
 
     def __init__(self,
                  data_schema: Type[Mixin],
-                 entity_schema: Type[EntityMixin] = Stock,
+                 entity_schema: Type[EntityMixin] = None,
                  provider: str = None,
                  entity_provider: str = None,
                  entity_ids: List[str] = None,
@@ -323,7 +319,7 @@ class FilterFactor(Factor):
 class ScoreFactor(Factor):
     factor_type = FactorType.score
 
-    def __init__(self, data_schema: Mixin, entity_schema: EntityMixin = Stock, provider: str = None,
+    def __init__(self, data_schema: Mixin, entity_schema: EntityMixin = None, provider: str = None,
                  entity_provider: str = None, entity_ids: List[str] = None, exchanges: List[str] = None,
                  codes: List[str] = None, the_timestamp: Union[str, pd.Timestamp] = None,
                  start_timestamp: Union[str, pd.Timestamp] = None, end_timestamp: Union[str, pd.Timestamp] = None,

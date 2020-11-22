@@ -6,7 +6,7 @@ from zvt.api.quote import decode_entity_id, get_kdata_schema
 from zvt.api.trader_info_api import OrderReader, AccountStatsReader
 from zvt.contract.reader import DataReader
 from zvt.contract.zvt_context import entity_schema_map
-from zvt.drawer.drawer import Drawer
+from zvt.contract.drawer import Drawer
 from zvt.utils.pd_utils import pd_is_not_null
 
 

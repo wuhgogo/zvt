@@ -7,7 +7,7 @@ from zvt.api.quote import get_kdata_schema
 from zvt.contract import IntervalLevel, EntityMixin, AdjustType
 from zvt.domain import Stock
 from zvt.factors.algorithm import MacdTransformer, consecutive_count
-from zvt.factors.factor import Factor, Transformer, Accumulator, FactorMeta
+from zvt.contract.factor import Factor, Transformer, Accumulator, FactorMeta
 
 
 class TechnicalFactor(Factor, metaclass=FactorMeta):

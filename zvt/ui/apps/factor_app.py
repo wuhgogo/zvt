@@ -5,7 +5,7 @@ import dash_html_components as html
 from dash import dash
 from dash.dependencies import Input, Output
 
-from zvt.factors.factor import factor_cls_registry
+from zvt.contract.factor import factor_cls_registry
 from zvt.ui import zvt_app
 from zvt.utils.time_utils import TIME_FORMAT_DAY, now_pd_timestamp
 

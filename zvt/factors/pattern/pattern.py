@@ -4,12 +4,12 @@ from typing import List, Union, Optional
 
 import pandas as pd
 
-from zvt.api import get_kdata
 from zvt.contract import EntityMixin
 from zvt.contract import IntervalLevel, AdjustType
+from zvt.contract.drawer import Rect
+from zvt.contract.factor import Transformer, Accumulator
 from zvt.domain import Stock
-from zvt.drawer.drawer import Rect
-from zvt.factors import Transformer, TechnicalFactor, Accumulator
+from zvt.factors import TechnicalFactor
 from zvt.factors.algorithm import intersect
 from zvt.utils import pd_is_not_null
 
@@ -509,5 +509,4 @@ if __name__ == '__main__':
     # fig = drawer.draw_kline(show=True)
 
 # the __all__ is generated
-__all__ = ['Fenxing', 'KState', 'DuanState', 'a_include_b', 'is_including', 'get_direction', 'is_up',
-           'is_down', 'handle_first_fenxing', 'handle_duan', 'handle_including', 'ZenTransformer', 'ZenFactor']
+__all__ = ['Direction', 'Fenxing', 'KState', 'DuanState', 'a_include_b', 'is_including', 'get_direction', 'is_up', 'is_down', 'handle_first_fenxing', 'handle_duan', 'handle_including', 'ZenTransformer', 'ZenFactor']

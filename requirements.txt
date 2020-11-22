@@ -11,3 +11,4 @@ plotly==4.12.0
 dash==1.17.0
 simplejson==3.16.0
 jqdatapy==0.1.2
+dash-bootstrap-components
