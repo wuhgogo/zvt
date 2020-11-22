@@ -5,9 +5,9 @@ import dash_html_components as html
 from dash import dash
 from dash.dependencies import Input, Output
 
-from zvt.contract.factor import factor_cls_registry
+from zvt.contract import zvt_context, IntervalLevel
+from zvt.contract.api import get_entities
 from zvt.ui import zvt_app
-from zvt.utils.time_utils import TIME_FORMAT_DAY, now_pd_timestamp
 
 
 def factor_layout():
@@ -20,39 +20,54 @@ def factor_layout():
                     html.Div(
                         className="bg-white user-control",
                         children=[
+                            # select factor
                             html.Div(
                                 className="padding-top-bot",
                                 children=[
                                     html.H6("select factor:"),
                                     dcc.Dropdown(id='factor-selector',
-                                                 placeholder='select the factor',
+                                                 placeholder='select factor',
                                                  options=[{'label': name, 'value': name} for name in
-                                                          factor_cls_registry.keys()]
-                                                 ),
-                                ],
+                                                          zvt_context.factor_cls_registry.keys()],
+                                                 value='ZenFactor')
+                                ]
                             ),
+                            # select entity_type
                             html.Div(
                                 className="padding-top-bot",
                                 children=[
-                                    html.H6("select factor target:"),
-                                    dcc.Dropdown(id='code-selector',
-                                                 placeholder='select the target'
-                                                 ),
+                                    html.H6("select entity type:"),
+                                    dcc.Dropdown(id='entity-type-selector',
+                                                 placeholder='select entity type',
+                                                 options=[{'label': name, 'value': name} for name in
+                                                          zvt_context.entity_schema_map.keys()],
+                                                 value='stock')
                                 ],
                             ),
 
+                            # select code
                             html.Div(
                                 className="padding-top-bot",
                                 children=[
-                                    # time range filter
-                                    dcc.DatePickerRange(
-                                        id='date-picker-range',
-                                        start_date='2009-01-01',
-                                        end_date=now_pd_timestamp(),
-                                        display_format=TIME_FORMAT_DAY
-                                    )
+                                    html.H6("select code:"),
+                                    dcc.Dropdown(id='code-selector',
+                                                 placeholder='select code')
                                 ],
                             ),
+                            # select levels
+                            html.Div(
+                                className="padding-top-bot",
+                                children=[
+                                    html.H6("select levels:"),
+                                    dcc.Dropdown(
+                                        id='levels-selector',
+                                        options=[{'label': level.name, 'value': level.value} for level in
+                                                 (IntervalLevel.LEVEL_1WEEK, IntervalLevel.LEVEL_1DAY)],
+                                        value='1d',
+                                        multi=True
+                                    )
+                                ],
+                            )
                         ])
                 ]),
             # Graph
@@ -70,12 +85,39 @@ def factor_layout():
 
 
 @zvt_app.callback(
+    Output('code-selector', 'options'),
+    [Input('entity-type-selector', 'value')])
+def update_code_selector(entity_type):
+    if entity_type is not None:
+        return [{'label': code, 'value': code} for code in
+                get_entities(entity_type=entity_type, columns=['code']).index]
+    raise dash.PreventUpdate()
+
+
+@zvt_app.callback(
     Output('factor-details', 'children'),
     [Input('factor-selector', 'value'),
-     Input('code-selector', 'value')])
-def update_factor_details(factor, code):
-    if factor is not None:
-        return dcc.Graph(
-            id=f'000338-factor',
-            figure=factor_cls_registry[factor](codes=['000338']).draw(show=False, height=800))
+     Input('entity-type-selector', 'value'),
+     Input('code-selector', 'value'),
+     Input('levels-selector', 'value')])
+def update_factor_details(factor, entity_type, code, levels):
+    if factor and entity_type and code:
+        if type(levels) is list:
+            levels.sort(reverse=True)
+            graphs = []
+            for level in levels:
+                graphs.append(dcc.Graph(
+                    id=f'{factor}-{entity_type}-{code}-{level}',
+                    figure=zvt_context.factor_cls_registry[factor](
+                        entity_schema=zvt_context.entity_schema_map[entity_type],
+                        level=level,
+                        codes=[code]).draw(show=False, height=600)))
+
+            return graphs
+        else:
+            return dcc.Graph(
+                id=f'{factor}-{entity_type}-{code}',
+                figure=zvt_context.factor_cls_registry[factor](entity_schema=zvt_context.entity_schema_map[entity_type],
+                                                               level=levels,
+                                                               codes=[code]).draw(show=False, height=600))
     raise dash.PreventUpdate()

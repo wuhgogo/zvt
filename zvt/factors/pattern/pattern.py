@@ -113,7 +113,7 @@ def handle_first_fenxing(one_df, step=11):
         return Fenxing(state=fenxing, index=fenxing_index, kdata=one_df.loc[fenxing_index]), start_index, direction
     else:
         print("need add step")
-        handle_first_fenxing(one_df, step=step + 1)
+        return handle_first_fenxing(one_df, step=step + 1)
 
 
 def handle_duan(fenxing_list: List[Fenxing], pre_duan_state='yi'):
@@ -250,7 +250,7 @@ class ZenTransformer(Transformer):
         pre_kdata = df.iloc[start_index - 1]
         pre_index = start_index - 1
         for index, kdata in df.iloc[start_index:].iterrows():
-            print(f'timestamp: {kdata.timestamp}')
+            # print(f'timestamp: {kdata.timestamp}')
             # 临时方向
             tmp_direction = get_direction(kdata, pre_kdata, current=tmp_direction)
 
@@ -377,7 +377,7 @@ class ZenFactor(TechnicalFactor):
 
         flag_df: pd.DataFrame = pd.concat([df1, df2])
         flag_df = flag_df.sort_values(by=['timestamp'])
-        flag_df['entity_id'] = 'stock_sz_000338'
+        flag_df['entity_id'] = self.entity_ids[0]
         flag_df = flag_df.set_index(['entity_id', 'timestamp'])
 
         # 处理段
@@ -388,7 +388,7 @@ class ZenFactor(TechnicalFactor):
 
         duan_df: pd.DataFrame = pd.concat([df1, df2])
         duan_df = duan_df.sort_values(by=['timestamp'])
-        duan_df['entity_id'] = 'stock_sz_000338'
+        duan_df['entity_id'] = self.entity_ids[0]
         duan_df = duan_df.set_index(['entity_id', 'timestamp'])
 
         # 处理中枢
@@ -428,7 +428,8 @@ class ZenFactor(TechnicalFactor):
         return [self.fenxing_value_df[['value']], self.duan_value_df]
 
     def drawer_annotation_df(self) -> Optional[pd.DataFrame]:
-        return self.fenxing_value_df
+        # return self.fenxing_value_df
+        return None
 
     def drawer_rects(self) -> List[Rect]:
         return self.zhongshu_rects
@@ -509,4 +510,5 @@ if __name__ == '__main__':
     # fig = drawer.draw_kline(show=True)
 
 # the __all__ is generated
-__all__ = ['Direction', 'Fenxing', 'KState', 'DuanState', 'a_include_b', 'is_including', 'get_direction', 'is_up', 'is_down', 'handle_first_fenxing', 'handle_duan', 'handle_including', 'ZenTransformer', 'ZenFactor']
+__all__ = ['Direction', 'Fenxing', 'KState', 'DuanState', 'a_include_b', 'is_including', 'get_direction', 'is_up',
+           'is_down', 'handle_first_fenxing', 'handle_duan', 'handle_including', 'ZenTransformer', 'ZenFactor']
