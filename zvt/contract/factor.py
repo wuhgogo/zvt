@@ -8,7 +8,6 @@ import pandas as pd
 
 from zvt.contract import IntervalLevel, Mixin, EntityMixin
 from zvt.contract.api import get_data, df_to_db
-from zvt.contract.drawer import Drawer
 from zvt.contract.normal_data import NormalData
 from zvt.contract.reader import DataReader, DataListener
 from zvt.contract.zvt_context import factor_cls_registry
@@ -136,7 +135,7 @@ class Factor(DataReader, DataListener):
                  filters: List = None,
                  order: object = None,
                  limit: int = None,
-                 level: Union[str, IntervalLevel] = IntervalLevel.LEVEL_1DAY,
+                 level: Union[str, IntervalLevel] = None,
                  category_field: str = 'entity_id',
                  time_field: str = 'timestamp',
                  computing_window: int = None,
@@ -261,10 +260,6 @@ class Factor(DataReader, DataListener):
         cost_time = time.time() - start_time
         self.logger.info('after_compute finished,cost_time:{}'.format(cost_time))
         self.logger.info('<<<<<<')
-
-    def factor_drawer(self) -> Drawer:
-        drawer = Drawer(self.factor_df)
-        return drawer
 
     def drawer_main_df(self) -> Optional[NormalData]:
         return self.data_df

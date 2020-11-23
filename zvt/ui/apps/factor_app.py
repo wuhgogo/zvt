@@ -7,6 +7,7 @@ from dash.dependencies import Input, Output
 
 from zvt.contract import zvt_context, IntervalLevel
 from zvt.contract.api import get_entities
+from zvt.contract.drawer import StackedDrawer
 from zvt.ui import zvt_app
 
 
@@ -104,16 +105,16 @@ def update_factor_details(factor, entity_type, code, levels):
     if factor and entity_type and code:
         if type(levels) is list:
             levels.sort(reverse=True)
-            graphs = []
+            drawers = []
             for level in levels:
-                graphs.append(dcc.Graph(
-                    id=f'{factor}-{entity_type}-{code}-{level}',
-                    figure=zvt_context.factor_cls_registry[factor](
-                        entity_schema=zvt_context.entity_schema_map[entity_type],
-                        level=level,
-                        codes=[code]).draw(show=False, height=600)))
+                drawers.append(zvt_context.factor_cls_registry[factor](
+                    entity_schema=zvt_context.entity_schema_map[entity_type],
+                    level=level, codes=[code]).drawer())
+            stacked = StackedDrawer(*drawers)
 
-            return graphs
+            return dcc.Graph(
+                id=f'{factor}-{entity_type}-{code}',
+                figure=stacked.draw_kline(show=False, height=900))
         else:
             return dcc.Graph(
                 id=f'{factor}-{entity_type}-{code}',

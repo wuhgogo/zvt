@@ -61,7 +61,7 @@ class DataReader(Drawable):
                  filters: List = None,
                  order: object = None,
                  limit: int = None,
-                 level: IntervalLevel = IntervalLevel.LEVEL_1DAY,
+                 level: IntervalLevel = None,
                  category_field: str = 'entity_id',
                  time_field: str = 'timestamp',
                  computing_window: int = None) -> None:
