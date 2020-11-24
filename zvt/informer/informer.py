@@ -27,9 +27,7 @@ class EmailInformer(Informer):
     def send_message_(self, to_user, title, body, **kwargs):
         host = zvt_config['smtp_host']
         port = zvt_config['smtp_port']
-        to_user = zvt_env['email_username']
-        host = zvt_env['smtp_host']
-        port = zvt_env['smtp_port']
+        to_user = zvt_config['email_username']
         if self.ssl:
             try:
                 smtp_client = smtplib.SMTP_SSL(host=host, port=port)
@@ -62,7 +60,7 @@ class EmailInformer(Informer):
             self.logger.exception('send email failed', e)
 
     def send_message(self, to_user, title, body, sub_size=20, with_sender=True, **kwargs):
-        to_user = zvt_env['email_username']
+        to_user = zvt_config['email_username']
         if type(to_user) is list and sub_size:
             size = len(to_user)
             if size >= sub_size:
