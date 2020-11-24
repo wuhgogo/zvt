@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-# -*- coding: utf-8 -*-
 from typing import List, Union
 
 import pandas as pd
 
 from zvt.contract import IntervalLevel, EntityMixin
 from zvt.domain import Stock1dKdata, Stock
-from zvt.factors import ScoreFactor, Transformer, Accumulator
+from zvt.contract.factor import ScoreFactor, Transformer, Accumulator
 from zvt.factors.algorithm import RankScorer
 
 

@@ -8,9 +8,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 import requests
-import schedule
 
-from zvt import zvt_env
+from zvt import zvt_config
 
 
 class Informer(object):
@@ -26,6 +25,8 @@ class EmailInformer(Informer):
         self.ssl = ssl
 
     def send_message_(self, to_user, title, body, **kwargs):
+        host = zvt_config['smtp_host']
+        port = zvt_config['smtp_port']
         to_user = zvt_env['email_username']
         host = zvt_env['smtp_host']
         port = zvt_env['smtp_port']
@@ -41,10 +42,10 @@ class EmailInformer(Informer):
                 smtp_client = smtplib.SMTP()
 
         smtp_client.connect(host=host, port=port)
-        smtp_client.login(zvt_env['email_username'], zvt_env['email_password'])
+        smtp_client.login(zvt_config['email_username'], zvt_config['email_password'])
         msg = MIMEMultipart('alternative')
         msg['Subject'] = Header(title).encode()
-        msg['From'] = "{} <{}>".format(Header('zvt').encode(), zvt_env['email_username'])
+        msg['From'] = "{} <{}>".format(Header('zvt').encode(), zvt_config['email_username'])
         if type(to_user) is list:
             msg['To'] = ", ".join(to_user)
         else:
@@ -56,7 +57,7 @@ class EmailInformer(Informer):
         msg.attach(plain_text)
 
         try:
-            smtp_client.sendmail(zvt_env['email_username'], to_user, msg.as_string())
+            smtp_client.sendmail(zvt_config['email_username'], to_user, msg.as_string())
         except Exception as e:
             self.logger.exception('send email failed', e)
 
@@ -74,7 +75,7 @@ class EmailInformer(Informer):
             for step in range(step_size):
                 sub_to_user = to_user[sub_size * step:sub_size * (step + 1)]
                 if with_sender:
-                    sub_to_user.append(zvt_env['email_username'])
+                    sub_to_user.append(zvt_config['email_username'])
                 self.send_message_(sub_to_user, title, body, **kwargs)
         else:
             self.send_message_(to_user, title, body, **kwargs)
@@ -82,7 +83,7 @@ class EmailInformer(Informer):
 
 class WechatInformer(Informer):
     GET_TOKEN_URL = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={}&secret={}".format(
-        zvt_env['wechat_app_id'], zvt_env['wechat_app_secrect'])
+        zvt_config['wechat_app_id'], zvt_config['wechat_app_secrect'])
 
     GET_TEMPLATE_URL = "https://api.weixin.qq.com/cgi-bin/template/get_all_private_template?access_token={}"
     SEND_MSG_URL = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token={}"
@@ -91,7 +92,6 @@ class WechatInformer(Informer):
 
     def __init__(self) -> None:
         self.refresh_token()
-        schedule.every(10).minutes.do(self.refresh_token)
 
     def refresh_token(self):
         resp = requests.get(self.GET_TOKEN_URL)
@@ -169,3 +169,5 @@ if __name__ == '__main__':
     # weixin_action = WechatInformer()
     # weixin_action.send_price_notification(to_user='oRvNP0XIb9G3g6a-2fAX9RHX5--Q', security_name='BTC/USDT',
     #                                       current_price=1000, change_pct='0.5%')
+# the __all__ is generated
+__all__ = ['Informer', 'EmailInformer', 'WechatInformer']
