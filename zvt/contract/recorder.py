@@ -396,8 +396,21 @@ class TimeSeriesDataRecorder(RecorderForEntities):
                     if index != 0:
                         self.sleep()
 
-                    original_list = self.record(entity_item, start=start_timestamp, end=end_timestamp, size=size,
-                                                timestamps=timestamps)
+                    retry = 1
+                    while True:
+                        try:
+                            original_list = self.record(entity_item, start=start_timestamp, end=end_timestamp,
+                                                        size=size,
+                                                        timestamps=timestamps)
+                        except Exception as e:
+                            if retry < 5:
+                                retry += 1
+                                self.logger.info('retry {}'.format(retry))
+                                self.logger.error(e)
+                                time.sleep(5)
+                                continue
+                            else:
+                                raise e
 
                     all_duplicated = True
 
