@@ -409,6 +409,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
                             original_list = self.record(entity_item, start=start_timestamp, end=end_timestamp,
                                                         size=size,
                                                         timestamps=timestamps)
+                            break
                         except Exception as e:
                             if retry < 5:
                                 retry += 1

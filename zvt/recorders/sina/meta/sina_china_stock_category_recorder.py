@@ -76,7 +76,7 @@ class SinaChinaBlockStockRecorder(TimeSeriesDataRecorder):
         for page in range(1, 5):
             resp = requests.get(self.category_stocks_url.format(page, entity.code))
             try:
-                if resp.text == 'null' or resp.text is None:
+                if resp.text == 'null' or resp.text is None or resp.text == '[]':
                     break
                 category_jsons = demjson.decode(resp.text)
                 the_list = []
