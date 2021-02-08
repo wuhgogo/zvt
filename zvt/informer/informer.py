@@ -83,6 +83,7 @@ class WechatInformer(Informer):
 
     GET_TEMPLATE_URL = "https://api.weixin.qq.com/cgi-bin/template/get_all_private_template?access_token={}"
     SEND_MSG_URL = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token={}"
+    SC_URL = "http://sc.ftqq.com/{}.send".format(zvt_config['wechat_sckey'])
 
     token = None
 
@@ -97,6 +98,27 @@ class WechatInformer(Informer):
             self.token = resp.json()['access_token']
         else:
             self.logger.exception("could not refresh_token")
+
+    def send_sc_message(self, text, content):
+        body = {'text': text, 'desp': json.dumps(content, ensure_ascii=False).encode('utf-8')}
+        the_data = body
+        resp = requests.post(self.SC_URL, the_data)
+
+        self.logger.info("send_message resp:{}".format(resp.text))
+
+        if resp.json() and resp.json()["errno"] == 0:
+            self.logger.info("send_message data:{} success".format(body))
+
+    def send_template_message(self, body, **kwargs):
+        body['touser'] = zvt_config['wechat_to_user']
+        the_data = json.dumps(body, ensure_ascii=False).encode('utf-8')
+
+        resp = requests.post(self.SEND_MSG_URL.format(self.token), the_data)
+
+        self.logger.info("send_message resp:{}".format(resp.text))
+
+        if resp.json() and resp.json()["errcode"] == 0:
+            self.logger.info("send_message data:{} success".format(body))
 
     def send_price_notification(self, to_user, security_name, current_price, change_pct):
         the_json = self._format_price_notification(to_user, security_name, current_price, change_pct)
