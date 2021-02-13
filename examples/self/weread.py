@@ -64,7 +64,7 @@ def team_up_template(message, url):
     }
 
 
-@sched.scheduled_job('cron', hour=0, minute=5, day_of_week='5')
+@sched.scheduled_job('cron', hour=12, minute=5, day_of_week='5')
 def team_up_job():
     while True:
         error_count = 0
