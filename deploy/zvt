@@ -1,0 +1,111 @@
+#!/bin/bash
+
+#define var
+usage="usage:{start|stop|restart|status|log} {main|jp|s|e1|e2|j1|j2|j3}"
+python_cmd="python"
+jupyter_cmd="jupyter notebook"
+cmd=${python_cmd}
+args=""
+main_path="/root/Application/project/zvt/zvt/"
+recorder_path="/root/Application/project/zvt/examples/recorders/"
+self_path="/root/Application/project/zvt/examples/self/"
+log_path="/root/Application/Log/Zvt/"
+
+status() {
+   echo "==========status======="
+   ps -ef | grep "${cmd}" | grep -v grep
+}
+
+start() {
+
+    #choose env
+    source activate zvt
+    #export path
+    export PYTHONPATH=$PYTHONPATH:~/Application/project/zvt
+    echo "==========start==========="
+    eval "nohup ${cmd} >> "${log_path}${name}" 2>&1 &"
+}
+
+stop() {
+    echo "===========stop============"
+    ps aux | grep "${cmd}" | grep -v grep | awk '{print $2}'| xargs kill -9
+}
+
+restart() {
+    stop $cmd;
+    echo "sleeping.........";
+    sleep 3;
+    start $cmd;
+}
+
+log() {
+    tail -f "${log_path}${name}"
+}
+
+case "$2" in
+    'main')
+        name="main"
+        args="${main_path}$name.py"
+        ;;
+    'jp')
+        cmd=${jupyter_cmd}
+        args="--ip=0.0.0.0 --allow-root"
+        name="jupyter"
+        ;;
+    's')
+        name="sina_data_runner"
+        args="$recorder_path${name}.py"
+        ;;
+    'e1')
+        name="eastmoney_data_runner1"
+        args="$recorder_path${name}.py"
+        ;;
+    'e2')
+        name="eastmoney_data_runner2"
+        args="$recorder_path${name}.py"
+        ;;
+    'j1')
+        name="joinquant_kdata_runner"
+        args="$recorder_path${name}.py"
+        ;;
+    'j2')
+        name="joinquant_fund_recorder"
+        args="$recorder_path${name}.py"
+        ;;
+    'j3')
+        name="joinquant_other_data_runner"
+        args="$recorder_path${name}.py"
+        ;;
+    'wr')
+        name="weread"
+        args="$self_path${name}.py"
+        ;;
+    *)
+    echo $usage
+    exit 1
+        ;;
+    esac
+
+cmd="${cmd} ${args}"
+
+case "$1" in
+    'start')
+        start
+        ;;
+    'stop')
+        stop
+        ;;
+    'status')
+        status
+        ;;
+    'restart')
+        restart
+        ;;
+    'log')
+        log
+        ;;
+    *)
+    echo ${usage}
+    exit 1
+        ;;
+    esac

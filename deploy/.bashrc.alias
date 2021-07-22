@@ -1,0 +1,6 @@
+alias zvt="/root/Application/Server/Shell/zvt/zvt"
+alias zvt-ps="ps -ef | grep -E '(main)|(jupyter)|(sina)|(eastmoney)|(joinquant)' | grep -v '(main)|(jupyter)|(sina)|(eastmoney)|(joinquant)'"
+alias zvt-dir="cd /root/Application/project/zvt/"
+alias zvt-data="cd /root/zvt-home/data/"
+alias zvt-log="cd /root/Application/Log/Zvt/"
+export PATH="/opt/conda/bin:$PATH"
